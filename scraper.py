@@ -21,7 +21,23 @@ def get_citations_needed_count(url_string):
 
 
 def get_citations_needed_report(url_string):
-    pass
+    def get_citations_needed_report(url_string):
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(slow_mo=500)
+            page = browser.new_page()
+            page.goto(url_string)
+
+            soup = bs(page.content(), 'html.parser')
+            citations_result = soup.find_all(title="Wikipedia:Citation needed")
+            report = "Citation Report\n\n"
+            for citation in citations_result:
+                parent = citation.parent.parent.parent
+                report += parent.text + "\n"
+
+            print(report)
+            # print(f"There are {len(citations_result)} citations needed!")
+            browser.close()
+            return report
 
 
 if __name__ == "__main__":
